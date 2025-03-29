@@ -23,7 +23,7 @@ class _CountdownComponentState extends State<CountdownComponent> {
   @override
   Widget build(BuildContext context) {
     return CircularCountDownTimer(
-      duration: 10,
+      duration: 100,
       initialDuration: 0,
       controller: _controller,
       width: MediaQuery.of(context).size.width / 2,

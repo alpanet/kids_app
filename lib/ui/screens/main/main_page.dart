@@ -1,45 +1,65 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:kids_app/services/dio_client.dart';
 import 'package:kids_app/theme.dart';
 import 'package:kids_app/ui/components/movie_card_component.dart';
 
 @RoutePage()
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final List<Map<String, String>> moviesSuggest = [
-      {
-        'title': 'The Mystery of the Missing Marshmallows',
-        'description':
-            'A deliciously puzzling adventure where young sleuths must track down the trail of missing marshmallows from the campfire, unraveling clues and discovering tasty secrets along the way.',
-        'duration': '90 dk',
-        'imageUrl': 'https://img.youtube.com/vi/ZvodMMy43B8/maxresdefault.jpg',
-      },
-      {
-        'title': 'Adventures in the Candyland',
-        'description':
-            'Join the magical journey through Candyland where surprises await at every corner!',
-        'duration': '120 dk',
-        'imageUrl': 'https://img.youtube.com/vi/Va7gnpMnaQ8/maxresdefault.jpg',
-      },
-      {
-        'title': 'Treasure Hunt in the Jungle',
-        'description':
-            'Follow the treasure map to uncover mysteries and find hidden treasures in the jungle.',
-        'duration': '110 dk',
-        'imageUrl': 'https://img.youtube.com/vi/jfKfPfyJRdk/maxresdefault.jpg',
-      },
-    ];
+  _MainPageState createState() => _MainPageState();
+}
 
+class _MainPageState extends State<MainPage> {
+  List<dynamic> userMovies = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _getCategoryList();
+  }
+
+  Future<void> _getCategoryList() async {
+    try {
+      final response = await dioClient.dio.get('/category/get_category');
+
+      if (response.statusCode == 200) {
+        setState(() {
+          final List<dynamic> moviesList = response.data["data"] ?? [];
+          userMovies = moviesList.map((movie) {
+            return {
+              "title": movie["category_name"] ?? "Bilinmeyen Kategori",
+              "description": "Bu film hakkında açıklama bulunmamaktadır.",
+              "duration": "- dk",
+              "imageUrl":
+                  movie["image_url"] ?? "https://example.com/default-image.jpg",
+            };
+          }).toList();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Giriş başarısız: ${response.data}")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Hata oluştu: $e")),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.secondBackgoundColor,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left:24.0, top:24.0, right:24.0, bottom: 5.0),
+            padding: const EdgeInsets.only(
+                left: 24.0, top: 24.0, right: 24.0, bottom: 5.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -120,10 +140,13 @@ class MainPage extends StatelessWidget {
                                     context.router
                                         .replaceNamed('categoryMainPage');
                                   },
-                                  icon: const Icon(Icons.layers, size: 20),
+                                  icon: const Icon(Icons.layers,
+                                      size: 20,
+                                      color: AppTheme.primaryTextColor),
                                   label: const Text('Yeni Kategori'),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppTheme.fourthBackgoundColor,
+                                    backgroundColor:
+                                        AppTheme.fourthBackgoundColor,
                                     foregroundColor: AppTheme.primaryTextColor,
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 10,
@@ -139,7 +162,9 @@ class MainPage extends StatelessWidget {
                                     context.router
                                         .replaceNamed('watchlistPage');
                                   },
-                                  icon: const Icon(Icons.tv, size: 20),
+                                  icon: const Icon(Icons.tv,
+                                      size: 20,
+                                      color: AppTheme.secondBackgoundColor),
                                   label: const Text('Yeni İzlem'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
@@ -165,25 +190,46 @@ class MainPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Expanded(
-                      child: CustomScrollView(
-                        slivers: [
-                          SliverToBoxAdapter(
-                            child: MainPageListCardComponent(
-                              title: 'Önerilenler',
-                              movies: moviesSuggest,
+                      child: userMovies.isEmpty
+                          ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            InkWell(
+                              child: const Icon(
+                                Icons.add_circle,
+                                color: AppTheme.secondBackgoundColor,
+                                size: 80,
+                              ),
+                              onTap: () {
+                            context.router.replaceNamed('categoryNewCategoryPage');
+                          },
                             ),
-                          ),
-                          const SliverToBoxAdapter(
-                            child: SizedBox(height: 15), // Ek boşluk
-                          ),
-                          SliverToBoxAdapter(
-                            child: MainPageListCardComponent(
-                              title: 'Popüler Filmler',
-                              movies: moviesSuggest,
+                            const SizedBox(height: 16),
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 12.0, left: 38.0, right: 38.0),
+                                child: Text(
+                                  'Henüz bir kategoriniz yok. Hemen oluşturmaya başla',
+                                  textAlign: TextAlign.center,
+                                  style: AppTheme.secondaryButtonText,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        )
+                          : CustomScrollView(
+                              slivers: [
+                                SliverToBoxAdapter(
+                                  child: MainPageListCardComponent(
+                                    title: 'Kategorileriniz',
+                                    movies: userMovies,
+                                  ),
+                                ),
+                                const SliverToBoxAdapter(
+                                  child: SizedBox(height: 15), // Ek boşluk
+                                ),
+                              ],
+                            ),
                     ),
                   ],
                 ),
@@ -198,7 +244,7 @@ class MainPage extends StatelessWidget {
 
 class MainPageListCardComponent extends StatelessWidget {
   final String title;
-  final List<Map<String, String>> movies;
+  final List<dynamic> movies;
 
   const MainPageListCardComponent({
     super.key,

@@ -23,7 +23,7 @@ class OnboardingPage4 extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             const Padding(
-              padding: EdgeInsets.only(top: 90.0),
+              padding: EdgeInsets.only(top: 80.0),
             ),
             Text(
               'Çocuğunuz İçin En İyi Deneyim',

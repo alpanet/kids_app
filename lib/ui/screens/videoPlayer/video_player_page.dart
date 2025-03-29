@@ -110,15 +110,38 @@ class _VideoPageState extends State<VideoPage> {
           ),
         );
         SystemChrome.setPreferredOrientations([
-                              DeviceOrientation.landscapeRight,
-                              DeviceOrientation.landscapeLeft,
-                            ]);
+          DeviceOrientation.landscapeRight,
+          DeviceOrientation.landscapeLeft,
+        ]);
         return false;
       },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Column(
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () {
+                    SystemChrome.setPreferredOrientations(
+                        [DeviceOrientation.portraitUp]);
+                    Navigator.pop(context);
+                  },
+                ),
+                Expanded(
+                  child: Text(
+                    _youtubeController.metadata.title.isNotEmpty
+                        ? _youtubeController.metadata.title
+                        : "Loading...",
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              ],
+            ),
             Expanded(
               child: isVideo
                   ? host.contains("youtube.com") || host.contains("youtu.be")

@@ -38,7 +38,7 @@ class OnboardingPage2 extends StatelessWidget {
               style: AppTheme.onboardingSubTitle,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 70),
+            const SizedBox(height: 60),
             Center(
               child: Transform.rotate(
                 angle: 126,

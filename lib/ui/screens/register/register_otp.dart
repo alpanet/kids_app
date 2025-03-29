@@ -1,14 +1,23 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:kids_app/services/dio_client.dart';
 import 'package:kids_app/theme.dart';
 import 'package:kids_app/ui/components/button_component.dart';
 import 'package:kids_app/ui/components/countdown_component.dart';
 import 'package:kids_app/ui/components/otp_component.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @RoutePage()
 class RegisterOtp extends StatefulWidget {
-  const RegisterOtp({super.key});
+  const RegisterOtp({
+    super.key,
+    @PathParam('phoneNumber') required this.phoneNumber,
+    @PathParam('is_login') required this.is_login,
+  });
+  final String phoneNumber;
+  final bool is_login;
 
   @override
   // ignore: library_private_types_in_public_api
@@ -19,7 +28,6 @@ class _RegisterOtpState extends State<RegisterOtp> {
   bool _isButtonEnabled = false;
   late CountDownController _countdownController;
   String _otpString = "";
-
   @override
   void initState() {
     super.initState();
@@ -32,17 +40,74 @@ class _RegisterOtpState extends State<RegisterOtp> {
     });
   }
 
-  void _onResendPressed() {
+  Future<void> _onResendPressed() async {
     setState(() {
       _isButtonEnabled = false;
       _otpString = "";
     });
-    _countdownController.restart(duration: 10);
+    try {
+      final response = await dioClient.dio.post('/sms-auth/send-code', data: {
+        "phoneNumber": widget.phoneNumber,
+        "is_login": widget.is_login
+      });
+
+      if (response.statusCode == 200) {
+        _countdownController.restart(duration: 100);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Bilgileri kontrol edin: ${response.data}")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Hata oluştu: $e")),
+      );
+    }
   }
 
-  void _onProceedPressed() {
+  Future<void> _onProceedPressed() async {
     String otp = _otpString;
-    print('OTP Entered: $otp');
+    try {
+      final response = await dioClient.dio.post('/sms-auth/verify-code', data: {
+        "phoneNumber": widget.phoneNumber,
+        "verificationCode": otp,
+        "is_login": widget.is_login
+      });
+      if (widget.is_login) {
+        if (response.statusCode == 200) {
+          final data = response.data;
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('access_token', data['accessToken']);
+          await prefs.setString('refresh_token', data['refreshToken']);
+          context.router.replaceNamed('mainpage');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Bilgileri kontrol edin: ${response.data}")),
+          );
+        }
+      } else {
+        if (response.statusCode == 200) {
+          final data = response.data;
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('access_token', data['accessToken']);
+          await prefs.setString('refresh_token', data['refreshToken']);
+          context.router.replaceNamed('mainpage');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Bilgileri kontrol edin: ${response.data}")),
+          );
+        }
+      }
+    } on DioException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text("Giriş başarısız: ${e.response?.data["message"]}")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Hata oluştu: $e")),
+      );
+    }
   }
 
   @override
@@ -92,12 +157,7 @@ class _RegisterOtpState extends State<RegisterOtp> {
                 onPressed: _isButtonEnabled ? _onResendPressed : null,
               ),
               const SizedBox(height: 10),
-              ButtonComponent(
-                text: "İleri",
-                onPressed: () {
-                  context.router.replaceNamed('mainpage');
-                },
-              ),
+              ButtonComponent(text: "İleri", onPressed: _onProceedPressed),
             ],
           ),
         ),

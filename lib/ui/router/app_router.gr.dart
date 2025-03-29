@@ -21,6 +21,7 @@ import 'package:kids_app/ui/screens/register/register_otp.dart' as _i7;
 import 'package:kids_app/ui/screens/watchList/watch_new_page.dart' as _i9;
 import 'package:kids_app/ui/screens/watchList/watchlist_page.dart' as _i10;
 import 'package:kids_app/ui/screens/settings/settings.dart' as _i12;
+import 'package:kids_app/ui/screens/login/login.dart' as _i13;
 
 /// generated route for
 /// [_i1.CategoryMainPage]
@@ -150,7 +151,9 @@ class RegisterOtp extends _i11.PageRouteInfo<void> {
   static _i11.PageInfo page = _i11.PageInfo(
     name,
     builder: (data) {
-      return const _i7.RegisterOtp();
+      return _i7.RegisterOtp(
+          phoneNumber: data.pathParams.getString('phoneNumber'),
+          is_login: data.queryParams.getBool('is_login'));
     },
   );
 }
@@ -227,6 +230,25 @@ class SettingsPage extends _i11.PageRouteInfo<void> {
     name,
     builder: (data) {
       return const _i12.SettingsPage();
+    },
+  );
+}
+
+/// generated route for
+/// [_i13.Login]
+class Login extends _i11.PageRouteInfo<void> {
+  const Login({List<_i11.PageRouteInfo>? children})
+      : super(
+          Login.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'Login';
+
+  static _i11.PageInfo page = _i11.PageInfo(
+    name,
+    builder: (data) {
+      return const _i13.Login();
     },
   );
 }

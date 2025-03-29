@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:kids_app/theme.dart';
 import 'package:kids_app/services/notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @RoutePage()
 class SettingsPage extends StatefulWidget {
@@ -95,8 +96,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     children: [
                       const SizedBox(height: 15.0),
                       ListTile(
-                        leading:
-                            const Icon(Icons.notifications_active_outlined, size: 34.0, color: AppTheme.secondBackgoundColor),
+                        leading: const Icon(Icons.notifications_active_outlined,
+                            size: 34.0, color: AppTheme.secondBackgoundColor),
                         title:
                             Text('Bildirimler', style: AppTheme.settingsTitle),
                         trailing: Switch(
@@ -111,27 +112,39 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ),
                       ListTile(
-                        leading: const Icon(Icons.star_border_outlined, size: 34.0, color: AppTheme.secondBackgoundColor),
+                        leading: const Icon(Icons.star_border_outlined,
+                            size: 34.0, color: AppTheme.secondBackgoundColor),
                         title: Text('Uygulamayı Değerlendir',
                             style: AppTheme.settingsTitle),
                       ),
                       ListTile(
-                        leading: const Icon(Icons.share_outlined, size: 34.0, color: AppTheme.secondBackgoundColor),
+                        leading: const Icon(Icons.share_outlined,
+                            size: 34.0, color: AppTheme.secondBackgoundColor),
                         title: Text('Uygulamayı Paylaş',
                             style: AppTheme.settingsTitle),
                       ),
                       ListTile(
-                        leading: const Icon(Icons.lock_person_outlined, size: 34.0, color: AppTheme.secondBackgoundColor),
+                        leading: const Icon(Icons.lock_person_outlined,
+                            size: 34.0, color: AppTheme.secondBackgoundColor),
                         title: Text('Şartlar ve Koşullar',
                             style: AppTheme.settingsTitle),
                       ),
                       ListTile(
-                        leading: const Icon(Icons.mail_outline, size: 34.0, color: AppTheme.secondBackgoundColor),
+                        leading: const Icon(Icons.mail_outline,
+                            size: 34.0, color: AppTheme.secondBackgoundColor),
                         title: Text('İletişim', style: AppTheme.settingsTitle),
                       ),
                       ListTile(
-                        leading: const Icon(Icons.logout_outlined, size: 34.0, color: AppTheme.secondBackgoundColor),
+                        leading: const Icon(Icons.logout_outlined,
+                            size: 34.0, color: AppTheme.secondBackgoundColor),
                         title: Text('Çıkış Yap', style: AppTheme.settingsTitle),
+                        onTap: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.remove('access_token');
+                          await prefs.remove('refresh_token');
+
+                          context.router.replaceNamed('login');
+                        },
                       ),
                     ],
                   ),

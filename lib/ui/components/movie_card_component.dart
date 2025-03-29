@@ -121,7 +121,7 @@ class MovieCard extends StatelessWidget {
 }
 
 class MovieCardList extends StatelessWidget {
-  final List<Map<String, String>> movies;
+  final List<dynamic> movies;
 
   const MovieCardList({super.key, required this.movies});
 

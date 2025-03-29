@@ -45,6 +45,7 @@ dependencies:
   youtube_player_flutter: ^9.1.1
   shared_preferences: ^2.0.15
   google_fonts: ^4.0.3
+  dio: ^5.8.0+1
 
 
 dev_dependencies:

@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:kids_app/ui/router/auth_guard.dart';
 import 'app_router.gr.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Screen|App,Route')
@@ -9,15 +10,16 @@ class AppRouter extends RootStackRouter {
   @override
   final List<AutoRoute> routes = [
     AutoRoute(page: SplashRoute.page, initial: true, children: [
-      AutoRoute(page: OnboardingRoute.page, initial: true),
+      AutoRoute(page: Login.page, path: "login"),
+      AutoRoute(page: OnboardingRoute.page, path: "onboarding"),
       AutoRoute(page: RegisterGathering.page, path: "register"),
-      AutoRoute(page: RegisterOtp.page, path: "registerOtp"),
-      AutoRoute(page: MainPage.page, path: "mainpage"),
-      AutoRoute(page: WatchlistPage.page, path: "watchlistPage"),
-      AutoRoute(page: WatchNewPage.page, path: "watchNewPage"),
-      AutoRoute(page: CategoryMainPage.page, path: "categoryMainPage"),
-      AutoRoute(page: CategoryNewCategoryPage.page, path: "categoryNewCategoryPage"),
-      AutoRoute(page: SettingsPage.page, path: "settingsPage"),
+      AutoRoute(page: RegisterOtp.page, path: "registerOtp/:phoneNumber"),
+      AutoRoute(page: MainPage.page, path: "mainpage", initial: true , guards: [AuthGuard()]),
+      AutoRoute(page: WatchlistPage.page, path: "watchlistPage", guards: [AuthGuard()]),
+      AutoRoute(page: WatchNewPage.page, path: "watchNewPage", guards: [AuthGuard()]),
+      AutoRoute(page: CategoryMainPage.page, path: "categoryMainPage", guards: [AuthGuard()]),
+      AutoRoute(page: CategoryNewCategoryPage.page, path: "categoryNewCategoryPage", guards: [AuthGuard()]),
+      AutoRoute(page: SettingsPage.page, path: "settingsPage", guards: [AuthGuard()]),
     ]),
   ];
 
